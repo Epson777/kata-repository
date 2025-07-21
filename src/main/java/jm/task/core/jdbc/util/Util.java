@@ -1,30 +1,58 @@
 package jm.task.core.jdbc.util;
 
-import java.sql.Connection;
-import java.sql.Driver;
-import java.sql.DriverManager;
-import java.sql.SQLException;
+import java.sql.*;
 
 public class Util {
     private static final String URL = "jdbc:mysql://localhost:3307/mydbtest";
     private static final String USER = "root";
     private static final String PASSWORD = "root";
 
-    public static Connection getConnection() {
-        Connection connection;
+    static {
+        Driver driver;
         try {
-            Driver driver = new com.mysql.cj.jdbc.Driver();
+            driver = new com.mysql.cj.jdbc.Driver();
             DriverManager.registerDriver(driver);
-            connection = DriverManager.getConnection(URL, USER, PASSWORD);
-            System.out.println("Connected to database");
-            System.out.println(connection.getTransactionIsolation());
         } catch (SQLException e) {
             throw new RuntimeException(e);
         }
-        return connection;
     }
 
-    public static void main(String[] args) {
-        getConnection();
+    public static Connection getConnection() throws SQLException {
+        Connection connection = DriverManager.getConnection(URL, USER, PASSWORD);
+        connection.setAutoCommit(false);
+        return connection;
+    }
+    public static void commitAndClose(Connection connection) {
+        try {
+            if (connection != null) {
+                connection.commit();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Commit failed", e);
+        } finally {
+            closeConnection(connection);
+        }
+    }
+
+    public static void rollbackAndClose(Connection connection) {
+        try {
+            if (connection != null) {
+                connection.rollback();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Rollback failed", e);
+        } finally {
+            closeConnection(connection);
+        }
+    }
+
+    private static void closeConnection(Connection connection) {
+        try {
+            if (connection != null && !connection.isClosed()) {
+                connection.close();
+            }
+        } catch (SQLException e) {
+            throw new RuntimeException("Failed to close connection", e);
+        }
     }
 }
