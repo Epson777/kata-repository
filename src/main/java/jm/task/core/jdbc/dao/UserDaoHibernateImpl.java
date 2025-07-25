@@ -69,10 +69,9 @@ public class UserDaoHibernateImpl implements UserDao {
         Session session = getSessionFactory().getCurrentSession();
         Transaction transaction = session.beginTransaction();
 
-        String sql = "DELETE FROM user WHERE id = ?";
-        Query query = session.createSQLQuery(sql).addEntity(User.class);
-        query.setParameter(1, id);
-        query.executeUpdate();
+        User user = session.get(User.class, id);
+        session.delete(user);
+
         transaction.commit();
     }
 
@@ -95,7 +94,7 @@ public class UserDaoHibernateImpl implements UserDao {
     public void cleanUsersTable() {
         Session session = getSessionFactory().getCurrentSession();
         Transaction transaction = session.beginTransaction();
-        String sql = "DELETE FROM user";
+        String sql = "TRUNCATE user";
         Query query = session.createSQLQuery(sql).addEntity(User.class);
         query.executeUpdate();
         transaction.commit();
