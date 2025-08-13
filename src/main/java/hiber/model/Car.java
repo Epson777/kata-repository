@@ -22,8 +22,9 @@ public class Car {
     public Car() {
     }
 
-    public Car(String model) {
+    public Car(String model, int series) {
         this.model = model;
+        this.series = series;
     }
 
     public String getModel() {
